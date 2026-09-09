@@ -1,4 +1,4 @@
-# AuditIQ — SEO & AEO Website Audit Tool
+# AuditIQ — SEO, AEO & GEO Website Audit Tool
 
 AuditIQ is a complete, full-stack application that analyzes websites for Technical SEO, Answer Engine Optimization (AEO), and Generative Engine Optimization (GEO).
 

@@ -9,7 +9,7 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [notice, setNotice] = useState('');
 
-  const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const API = import.meta.env.VITE_API_BASE_URL;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -41,7 +41,7 @@ export default function ResetPasswordPage() {
         setTimeout(() => navigate('/login'), 2000);
       }
     } catch (err) {
-      setNotice('Network error: Unable to connect to the server.');
+      setNotice('Unable to connect to the server. Please try again later.');
     }
   };
 

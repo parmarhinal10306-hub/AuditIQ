@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useContext, useEffect, useState, useCallback } from 'react'
 import { AuthContext } from '../context/AuthContext'
 
-const API = import.meta.env.VITE_API_URL
+const API = import.meta.env.VITE_API_BASE_URL
 
 const formatDate = (ds) => {
   if (!ds) return '—'
@@ -101,7 +101,7 @@ export default function DashboardPage() {
         if (ovData.data.totalAudits === 0) setLoadState('empty')
       }
     } catch {
-      setDeleteError('Network error. Could not delete the audit.')
+      setDeleteError('Unable to connect to the server. Please try again later.')
     } finally {
       setDeletingId(null)
     }
@@ -144,7 +144,7 @@ export default function DashboardPage() {
           setLoadState('ready')
         }
       } catch {
-        setErrorMsg('Network error: could not reach the dashboard API.')
+        setErrorMsg('Unable to connect to the server. Please try again later.')
         setLoadState('error')
       }
     }

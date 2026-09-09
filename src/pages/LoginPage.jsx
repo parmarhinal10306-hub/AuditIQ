@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     setNotice('Loading...')
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password })
@@ -37,7 +37,7 @@ export default function LoginPage() {
         setTimeout(() => navigate('/dashboard'), 1000)
       }
     } catch (err) {
-      setNotice('Network error: Unable to connect to the server.')
+      setNotice('Unable to connect to the server. Please try again later.')
     }
   }
 

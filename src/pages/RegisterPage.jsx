@@ -34,7 +34,7 @@ export default function RegisterPage() {
 
     setNotice('Loading...')
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -53,7 +53,7 @@ export default function RegisterPage() {
         setTimeout(() => navigate('/login'), 1500);
       }
     } catch (error) {
-      setNotice('Network error: Unable to connect to the server.');
+      setNotice('Unable to connect to the server. Please try again later.');
     }
   }
 

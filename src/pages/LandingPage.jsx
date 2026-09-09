@@ -178,8 +178,8 @@ export default function LandingPage() {
               lineHeight: 1.7,
               margin: '0 0 2rem',
             }}>
-              Analyze your website, discover SEO problems, and optimize your content
-              for search engines, Answer Engine Optimization (AEO), and Generative Engine Optimization (GEO).
+              Analyze your website and improve performance across all three pillars of modern search —
+              Search Engine Optimization (SEO), Answer Engine Optimization (AEO), and Generative Engine Optimization (GEO).
             </p>
 
             {/* URL input — fused bar */}
@@ -238,7 +238,7 @@ export default function LandingPage() {
               display: 'flex', alignItems: 'center', gap: 5,
             }}>
               <span style={{ color: '#16a34a' }}><Icon d={ICONS.check} size={12} /></span>
-              Free — no sign-up required for your first report.
+              Start with a free website audit.
             </p>
           </div>
 

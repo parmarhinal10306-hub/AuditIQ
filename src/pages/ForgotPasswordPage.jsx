@@ -6,7 +6,7 @@ export default function ForgotPasswordPage() {
   const [notice, setNotice] = useState('');
   const [resetToken, setResetToken] = useState(null);
 
-  const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const API = import.meta.env.VITE_API_BASE_URL;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
         }
       }
     } catch (err) {
-      setNotice('Network error: Unable to connect to the server.');
+      setNotice('Unable to connect to the server. Please try again later.');
     }
   };
 

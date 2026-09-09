@@ -68,7 +68,7 @@ export default function AuditReportPage() {
 
     const fetchAudit = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/audits/${auditId}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/audits/${auditId}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
 
@@ -87,7 +87,7 @@ export default function AuditReportPage() {
         setAudit(data.data)
         setLoadState('ready')
       } catch (err) {
-        setErrorMsg('Network error: could not reach the audit API.')
+        setErrorMsg('Unable to connect to the server. Please try again later.')
         setLoadState('error')
       }
     }
@@ -299,25 +299,37 @@ export default function AuditReportPage() {
             <article className="score-cell">
               <div className="score-head">
                 <span>Technical SEO</span>
-                <span className="mini-label">Coming soon</span>
+                {audit.technicalScore ? (
+                  <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
+                ) : (
+                  <span className="mini-label">Not available</span>
+                )}
               </div>
-              <div className="score-number">— <span>/ 100</span></div>
+              <div className="score-number">{audit.technicalScore ? audit.technicalScore : '—'} <span>/ 100</span></div>
             </article>
 
             <article className="score-cell">
               <div className="score-head">
                 <span>On-Page SEO</span>
-                <span className="mini-label">Coming soon</span>
+                {audit.onPageScore ? (
+                  <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
+                ) : (
+                  <span className="mini-label">Not available</span>
+                )}
               </div>
-              <div className="score-number">— <span>/ 100</span></div>
+              <div className="score-number">{audit.onPageScore ? audit.onPageScore : '—'} <span>/ 100</span></div>
             </article>
 
             <article className="score-cell">
               <div className="score-head">
                 <span>Content</span>
-                <span className="mini-label">Coming soon</span>
+                {audit.contentScore ? (
+                  <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
+                ) : (
+                  <span className="mini-label">Not available</span>
+                )}
               </div>
-              <div className="score-number">— <span>/ 100</span></div>
+              <div className="score-number">{audit.contentScore ? audit.contentScore : '—'} <span>/ 100</span></div>
             </article>
           </div>
         </section>
@@ -358,7 +370,7 @@ export default function AuditReportPage() {
           <section className="panel-panel report-issue-panel">
             <div className="section-title-row compact-row">
               <div>
-                <span className="section-label">SEO Issues</span>
+                <span className="section-label">SEO Analysis</span>
                 <h2>Warnings</h2>
               </div>
               <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
@@ -388,7 +400,7 @@ export default function AuditReportPage() {
           <section className="panel-panel report-issue-panel">
             <div className="section-title-row compact-row">
               <div>
-                <span className="section-label">SEO Issues</span>
+                <span className="section-label">SEO Analysis</span>
                 <h2>Passed Checks</h2>
               </div>
               <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
@@ -413,6 +425,61 @@ export default function AuditReportPage() {
               )}
             </div>
           </section>
+        </section>
+
+        {/* ── SEO Recommendations ─────────────────────────────────────────── */}
+        <section className="panel-panel recommendations-panel">
+          <div className="section-title-row compact-row">
+            <div>
+              <span className="section-label">Prioritized SEO Plan</span>
+              <h2>SEO Recommendations</h2>
+            </div>
+            <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
+          </div>
+          <div className="recommendation-stack">
+            {seoRecs.high && seoRecs.high.length > 0 && (
+              <article className="recommendation-tier">
+                <div className="recommendation-tier-head"><span className="tier-label high">High Priority</span></div>
+                <div className="recommendation-list report-recommendations">
+                  {seoRecs.high.map((item) => (
+                    <article className="recommendation" key={item.title}>
+                      <span className="recommendation-icon">HP</span>
+                      <div><h3>{item.title}</h3><p>{item.explanation}</p></div>
+                    </article>
+                  ))}
+                </div>
+              </article>
+            )}
+            {seoRecs.medium && seoRecs.medium.length > 0 && (
+              <article className="recommendation-tier">
+                <div className="recommendation-tier-head"><span className="tier-label medium">Medium Priority</span></div>
+                <div className="recommendation-list report-recommendations">
+                  {seoRecs.medium.map((item) => (
+                    <article className="recommendation" key={item.title}>
+                      <span className="recommendation-icon">MP</span>
+                      <div><h3>{item.title}</h3><p>{item.explanation}</p></div>
+                    </article>
+                  ))}
+                </div>
+              </article>
+            )}
+            {seoRecs.low && seoRecs.low.length > 0 && (
+              <article className="recommendation-tier">
+                <div className="recommendation-tier-head"><span className="tier-label low">Low Priority / Passing</span></div>
+                <div className="recommendation-list report-recommendations">
+                  {seoRecs.low.map((item) => (
+                    <article className="recommendation" key={item.title}>
+                      <span className="recommendation-icon">LP</span>
+                      <div><h3>{item.title}</h3><p>{item.explanation}</p></div>
+                    </article>
+                  ))}
+                </div>
+              </article>
+            )}
+            {seoRecs.high?.length === 0 && seoRecs.medium?.length === 0 && seoRecs.low?.length === 0 && (
+              <p style={{ color: 'var(--text-secondary)' }}>No recommendations generated for SEO.</p>
+            )}
+          </div>
         </section>
 
         {/* ── AEO Analysis ───────────────────────────────────────────────── */}

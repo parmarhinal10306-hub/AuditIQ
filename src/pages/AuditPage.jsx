@@ -50,7 +50,7 @@ export default function AuditPage() {
     setProgress(30)
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/audits`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/audits`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ export default function AuditPage() {
       }, 1500)
       
     } catch (err) {
-      setErrorMessage('Network Error: Could not connect to the audit API.')
+      setErrorMessage('Unable to connect to the server. Please try again later.')
       setAuditState('error')
     }
   }
@@ -93,7 +93,7 @@ export default function AuditPage() {
             <div className="page-kicker">SEO + AEO + GEO Workspace</div>
             <h1>{pageTitle}</h1>
             <p className="audit-subtitle">
-              Enter your website address to begin a structured SEO and answer-engine readiness review.
+              Enter your website address to start a full SEO, AEO, and GEO diagnostic — covering technical health, content structure, answer-engine readiness, and generative engine citability.
             </p>
 
             <div className="audit-card">
@@ -171,15 +171,15 @@ export default function AuditPage() {
               <ul className="scope-list">
                 <li>
                   <span aria-hidden="true">●</span>
-                  Technical SEO health
+                  SEO — Technical health &amp; on-page signals
                 </li>
                 <li>
                   <span aria-hidden="true">●</span>
-                  Content and page structure
+                  AEO — Answer engine &amp; schema readiness
                 </li>
                 <li>
                   <span aria-hidden="true">●</span>
-                  Schema, answer &amp; generative readiness
+                  GEO — Generative engine citability signals
                 </li>
               </ul>
               <div className="aside-divider" />
