@@ -972,7 +972,7 @@ export default function LandingPage() {
           <p style={{ fontSize: '0.9375rem', color: '#94a3b8', margin: '0 0 2rem', lineHeight: 1.6 }}>
             Free for your first report. No credit card. No account needed.
           </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="cta-band-buttons" style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <Link to="/audit" className="btn-primary" style={{ padding: '0.7rem 1.5rem', fontSize: '0.9375rem' }}>
               Start a free audit
             </Link>
