@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL as API } from '../config/api';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [notice, setNotice] = useState('');
   const [resetToken, setResetToken] = useState(null);
 
-  const API = import.meta.env.VITE_API_BASE_URL;
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();

@@ -1,6 +1,7 @@
 import { useMemo, useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 export default function AuditPage() {
   const [url, setUrl] = useState('')
@@ -50,7 +51,7 @@ export default function AuditPage() {
     setProgress(30)
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/audits`, {
+      const response = await fetch(`${API_BASE_URL}/audits`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

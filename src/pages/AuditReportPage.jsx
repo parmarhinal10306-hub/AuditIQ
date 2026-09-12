@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { generateAuditPdf } from '../utils/generateAuditPdf'
+import { API_BASE_URL } from '../config/api'
 
 
 
@@ -68,7 +69,7 @@ export default function AuditReportPage() {
 
     const fetchAudit = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/audits/${auditId}`, {
+        const res = await fetch(`${API_BASE_URL}/audits/${auditId}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
 
@@ -141,13 +142,13 @@ export default function AuditReportPage() {
               <div className="page-kicker">SEO + AEO + GEO Intelligence</div>
               <h1 className="report-title">Audit Failed</h1>
               <div className="report-meta">
-                <span className="report-url">{audit.url}</span>
+                <span className="report-url break-all">{audit.url}</span>
                 <span className="meta-separator">•</span>
                 <span className="report-date">{formatDate(audit.createdAt)}</span>
               </div>
             </div>
-            <div className="report-actions">
-              <Link to="/audit" className="btn-primary">Try Again</Link>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+              <Link to="/audit" className="btn-primary flex justify-center">Try Again</Link>
             </div>
           </header>
           <div style={{ padding: '2rem 0' }}>
@@ -187,14 +188,14 @@ export default function AuditReportPage() {
             <div className="page-kicker">SEO + AEO + GEO Intelligence</div>
             <h1 className="report-title">Website Audit Report</h1>
             <div className="report-meta">
-              <span className="report-url">{audit.fetchedUrl || audit.url}</span>
+              <span className="report-url break-all">{audit.fetchedUrl || audit.url}</span>
               <span className="meta-separator">•</span>
               <span className="report-date">Audit Date: {formatDate(audit.createdAt)}</span>
             </div>
           </div>
-          <div className="report-actions">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto mt-6 md:mt-0">
             <span
-              className="sample-report-badge"
+              className="sample-report-badge self-start sm:self-auto"
               style={{ background: audit.status === 'completed' ? '#d1fae5' : undefined, color: audit.status === 'completed' ? '#065f46' : undefined }}
             >
               {audit.status === 'completed' ? 'Completed' : audit.status}
@@ -258,7 +259,7 @@ export default function AuditReportPage() {
               </p>
             )}
 
-            <Link to="/audit" className="btn-primary">Start New Audit</Link>
+            <Link to="/audit" className="btn-primary flex justify-center">Start New Audit</Link>
           </div>
         </header>
 
@@ -271,8 +272,8 @@ export default function AuditReportPage() {
             </div>
           </div>
 
-          <div className="score-grid report-score-grid">
-            <article className="score-cell score-cell-primary">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+            <article className="score-cell score-cell-primary break-words min-w-0">
               <div className="score-head">
                 <span>SEO Score</span>
                 <span className="mini-label">Live Data</span>
@@ -280,7 +281,7 @@ export default function AuditReportPage() {
               <div className="score-number">{audit.seoScore ?? '—'} <span>/ 100</span></div>
             </article>
 
-            <article className="score-cell">
+            <article className="score-cell break-words min-w-0">
               <div className="score-head">
                 <span>AEO Score</span>
                 <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
@@ -288,7 +289,7 @@ export default function AuditReportPage() {
               <div className="score-number">{audit.aeoScore ?? '—'} <span>/ 100</span></div>
             </article>
 
-            <article className="score-cell">
+            <article className="score-cell break-words min-w-0">
               <div className="score-head">
                 <span>GEO Score</span>
                 <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
@@ -296,7 +297,7 @@ export default function AuditReportPage() {
               <div className="score-number">{audit.geoScore ?? '—'} <span>/ 100</span></div>
             </article>
 
-            <article className="score-cell">
+            <article className="score-cell break-words min-w-0">
               <div className="score-head">
                 <span>Technical SEO</span>
                 {audit.technicalScore ? (
@@ -308,7 +309,7 @@ export default function AuditReportPage() {
               <div className="score-number">{audit.technicalScore ? audit.technicalScore : '—'} <span>/ 100</span></div>
             </article>
 
-            <article className="score-cell">
+            <article className="score-cell break-words min-w-0">
               <div className="score-head">
                 <span>On-Page SEO</span>
                 {audit.onPageScore ? (
@@ -320,7 +321,7 @@ export default function AuditReportPage() {
               <div className="score-number">{audit.onPageScore ? audit.onPageScore : '—'} <span>/ 100</span></div>
             </article>
 
-            <article className="score-cell">
+            <article className="score-cell break-words min-w-0">
               <div className="score-head">
                 <span>Content</span>
                 {audit.contentScore ? (
@@ -335,7 +336,7 @@ export default function AuditReportPage() {
         </section>
 
         {/* ── SEO Issues ────────────────────────────────────────────────── */}
-        <section className="report-content-layout">
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-6">
           {/* Critical */}
           <section className="panel-panel report-issue-panel">
             <div className="section-title-row compact-row">
@@ -440,7 +441,7 @@ export default function AuditReportPage() {
             {seoRecs.high && seoRecs.high.length > 0 && (
               <article className="recommendation-tier">
                 <div className="recommendation-tier-head"><span className="tier-label high">High Priority</span></div>
-                <div className="recommendation-list report-recommendations">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   {seoRecs.high.map((item) => (
                     <article className="recommendation" key={item.title}>
                       <span className="recommendation-icon">HP</span>
@@ -453,7 +454,7 @@ export default function AuditReportPage() {
             {seoRecs.medium && seoRecs.medium.length > 0 && (
               <article className="recommendation-tier">
                 <div className="recommendation-tier-head"><span className="tier-label medium">Medium Priority</span></div>
-                <div className="recommendation-list report-recommendations">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   {seoRecs.medium.map((item) => (
                     <article className="recommendation" key={item.title}>
                       <span className="recommendation-icon">MP</span>
@@ -466,7 +467,7 @@ export default function AuditReportPage() {
             {seoRecs.low && seoRecs.low.length > 0 && (
               <article className="recommendation-tier">
                 <div className="recommendation-tier-head"><span className="tier-label low">Low Priority / Passing</span></div>
-                <div className="recommendation-list report-recommendations">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   {seoRecs.low.map((item) => (
                     <article className="recommendation" key={item.title}>
                       <span className="recommendation-icon">LP</span>
@@ -492,7 +493,7 @@ export default function AuditReportPage() {
             <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
           </div>
 
-          <div className="aeo-check-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             {aeoChecks.length === 0 ? (
               <p style={{ color: 'var(--text-secondary)' }}>No AEO checks found.</p>
             ) : (
@@ -535,7 +536,7 @@ export default function AuditReportPage() {
             {aeoRecs.medium && aeoRecs.medium.length > 0 && (
               <article className="recommendation-tier">
                 <div className="recommendation-tier-head"><span className="tier-label medium">Medium Priority</span></div>
-                <div className="recommendation-list report-recommendations">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   {aeoRecs.medium.map((item) => (
                     <article className="recommendation" key={item.title}>
                       <span className="recommendation-icon">MP</span>
@@ -548,7 +549,7 @@ export default function AuditReportPage() {
             {aeoRecs.low && aeoRecs.low.length > 0 && (
               <article className="recommendation-tier">
                 <div className="recommendation-tier-head"><span className="tier-label low">Low Priority / Passing</span></div>
-                <div className="recommendation-list report-recommendations">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   {aeoRecs.low.map((item) => (
                     <article className="recommendation" key={item.title}>
                       <span className="recommendation-icon">LP</span>
@@ -574,7 +575,7 @@ export default function AuditReportPage() {
             <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
           </div>
 
-          <div className="aeo-check-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             {geoChecks.length === 0 ? (
               <p style={{ color: 'var(--text-secondary)' }}>No GEO checks found.</p>
             ) : (
@@ -608,7 +609,7 @@ export default function AuditReportPage() {
             {geoRecs.high && geoRecs.high.length > 0 && (
               <article className="recommendation-tier">
                 <div className="recommendation-tier-head"><span className="tier-label high">High Priority</span></div>
-                <div className="recommendation-list report-recommendations">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   {geoRecs.high.map((item) => (
                     <article className="recommendation" key={item.title}>
                       <span className="recommendation-icon">HP</span>
@@ -621,7 +622,7 @@ export default function AuditReportPage() {
             {geoRecs.medium && geoRecs.medium.length > 0 && (
               <article className="recommendation-tier">
                 <div className="recommendation-tier-head"><span className="tier-label medium">Medium Priority</span></div>
-                <div className="recommendation-list report-recommendations">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   {geoRecs.medium.map((item) => (
                     <article className="recommendation" key={item.title}>
                       <span className="recommendation-icon">MP</span>
@@ -634,7 +635,7 @@ export default function AuditReportPage() {
             {geoRecs.low && geoRecs.low.length > 0 && (
               <article className="recommendation-tier">
                 <div className="recommendation-tier-head"><span className="tier-label low">Low Priority / Passing</span></div>
-                <div className="recommendation-list report-recommendations">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                   {geoRecs.low.map((item) => (
                     <article className="recommendation" key={item.title}>
                       <span className="recommendation-icon">LP</span>

@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -21,7 +22,7 @@ export default function LoginPage() {
 
     setNotice('Loading...')
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password })

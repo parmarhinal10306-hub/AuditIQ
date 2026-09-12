@@ -1,8 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useContext, useEffect, useState, useCallback } from 'react'
 import { AuthContext } from '../context/AuthContext'
-
-const API = import.meta.env.VITE_API_BASE_URL
+import { API_BASE_URL as API } from '../config/api'
 
 const formatDate = (ds) => {
   if (!ds) return '—'
@@ -256,8 +255,8 @@ export default function DashboardPage() {
             <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
           </div>
 
-          <div className="score-grid">
-            <article className="score-cell score-cell-primary">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <article className="score-cell score-cell-primary break-words min-w-0">
               <div className="score-head">
                 <span>Avg SEO Score</span>
                 <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
@@ -299,9 +298,9 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="dashboard-lower-grid">
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-4 min-w-0">
           {/* Recent Audits Table */}
-          <section className="panel-panel recent-audits-panel">
+          <section className="panel-panel recent-audits-panel lg:col-span-2 overflow-hidden min-w-0">
             <div className="section-title-row compact-row">
               <div>
                 <span className="section-label">Audit History</span>
@@ -449,7 +448,7 @@ export default function DashboardPage() {
           </section>
 
           {/* Issues Summary */}
-          <aside className="panel-panel issue-panel">
+          <aside className="panel-panel issue-panel min-w-0 lg:col-span-1">
             <div className="section-title-row compact-row">
               <div>
                 <span className="section-label">Health Check</span>
@@ -496,7 +495,7 @@ export default function DashboardPage() {
               No recommendations yet. Run an audit to see actionable insights.
             </p>
           ) : (
-            <div className="recommendation-list">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {/* High priority first */}
               {recs.high.map((item, idx) => (
                 <article className="recommendation" key={`hp-${idx}`}>

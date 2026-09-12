@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { API_BASE_URL as API } from '../config/api';
 
 export default function ResetPasswordPage() {
   const { token } = useParams();
@@ -9,7 +10,7 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [notice, setNotice] = useState('');
 
-  const API = import.meta.env.VITE_API_BASE_URL;
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
