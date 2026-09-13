@@ -1019,6 +1019,18 @@ img, svg { display: inline-block; }
   .recommendation-list {
     grid-template-columns: 1fr;
   }
+  
+  /* Fix word breaking for long content on mobile */
+  .recommendation h3,
+  .recommendation p,
+  .aeo-check-head span,
+  .aeo-check p,
+  .issue-row h3,
+  .issue-row p,
+  .fix-block p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
 
   .dashboard-actions {
     width: 100%;
@@ -1101,6 +1113,7 @@ img, svg { display: inline-block; }
   .report-actions {
     align-items: stretch;
     flex-direction: column;
+    gap: 0.75rem;
   }
 
   .report-actions .btn-primary {
@@ -1119,8 +1132,9 @@ img, svg { display: inline-block; }
 }
 
 @media (max-width: 480px) {
-  .report-score-grid {
-    grid-template-columns: 1fr 1fr !important;
+  .report-score-grid,
+  .score-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -1535,6 +1549,46 @@ img, svg { display: inline-block; }
   html, body {
     overflow-x: hidden;
     width: 100%;
+    max-width: 100vw;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Prevent horizontal overflow on mobile universally */
+  .report-page, .dashboard-page, .audit-page, .auth-page {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .report-shell, .dashboard-shell, .audit-shell {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Force wrap on flex title headers to prevent text pushing the boundaries */
+  .section-title-row,
+  .issue-row-top,
+  .aeo-check-head,
+  .score-head {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  /* Ensure cards never exceed viewport and fit */
+  .score-cell, 
+  .panel-panel, 
+  .recommendation, 
+  .aeo-check,
+  .issue-row,
+  .feature-card,
+  .feature-card-highlight,
+  .audit-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
 
@@ -1551,10 +1605,10 @@ img, svg { display: inline-block; }
     letter-spacing: -0.025em;
   }
 
-  /* Score grid: always 2-col on tiny phones */
+  /* Score grid: always stack on tiny phones */
   .score-grid,
   .report-score-grid {
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: 1fr !important;
   }
 
   /* Full-width buttons on very small screens */
@@ -2453,51 +2507,89 @@ img, svg { display: inline-block; }
 .nav-toggle[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
 .nav-toggle[aria-expanded='true'] span:last-child { transform: translateY(-6px) rotate(-45deg); }
 
+/* ═══════════════════════════════════════════════════
+   LANDING PAGE — consolidated mobile fixes
+   These sit last so they win specificity battles.
+═══════════════════════════════════════════════════ */
+
+/* ── 1100px: hero panel shrinks to fit ── */
 @media (max-width: 1100px) {
   .hero-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
     gap: 2rem;
   }
 }
 
+/* ── 900px: hero stacks, feature grids collapse ── */
 @media (max-width: 900px) {
   .hero-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 1.75rem;
   }
+
   .hero-grid .hero-copy {
     max-width: unset;
   }
+
+  .hero-copy form {
+    max-width: 100%;
+  }
+
   .features-grid-flagship {
     grid-template-columns: 1fr !important;
   }
+
   .features-grid-trio {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1rem;
   }
+
   .feature-banner-content {
     grid-template-columns: 1fr !important;
+    gap: 1.25rem;
   }
+
   .how-grid {
     grid-template-columns: 1fr !important;
+    gap: 1rem;
   }
+
   .seo-aeo-split-container {
     grid-template-columns: 1fr !important;
   }
-  .seo-aeo-split-container > div:first-child {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
+
+  /* Fix inline border on SEO/AEO/GEO split panels */
+  .seo-aeo-split-container > div {
+    border-right: none !important;
+    border-left: none !important;
+    border-bottom: 1px solid var(--border) !important;
   }
+
+  .seo-aeo-split-container > div:last-child {
+    border-bottom: none !important;
+  }
+
   .footer-container {
     grid-template-columns: 1fr !important;
+    gap: 1.5rem;
   }
+
   .footer-links {
     gap: 2rem;
   }
+
   .footer-actions {
     justify-content: flex-start;
   }
 }
 
+/* ── 780px: hamburger nav, form stacks ── */
 @media (max-width: 780px) {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
   header nav {
     min-height: auto;
     padding: 0.9rem 1rem;
@@ -2542,254 +2634,119 @@ img, svg { display: inline-block; }
     text-align: center;
   }
 
-  .hero-grid {
-    gap: 2rem;
-  }
-
-  .hero-copy form {
-    max-width: 100%;
-  }
-
-  .hero-copy form > div {
-    flex-direction: column;
-    align-items: stretch;
-    border-radius: var(--radius);
-  }
-
-  .hero-copy form .url-icon {
-    padding: 0.72rem 0.9rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .hero-copy form input {
-    width: 100%;
-    padding: 0.78rem 0.75rem;
-  }
-
-  .hero-copy form button {
-    width: 100%;
-    padding: 0.82rem 1rem;
-    border-radius: 0 0 var(--radius) var(--radius);
-  }
-}
-
-@media (max-width: 640px) {
+  /* Hero form stacks vertically */
   .hero-grid {
     gap: 1.5rem;
   }
-  .hero-copy h1 {
-    font-size: clamp(1.8rem, 9vw, 2.4rem);
-  }
-  .hero-copy p {
-    font-size: 0.9375rem;
-  }
+
   .hero-copy form {
     max-width: 100%;
   }
+
   .hero-copy form > div {
-    flex-direction: column;
-    align-items: stretch;
-    border-radius: var(--radius);
+    flex-direction: column !important;
+    align-items: stretch !important;
+    border-radius: var(--radius) !important;
   }
+
   .hero-copy form .url-icon {
-    padding: 0.72rem 0.9rem;
-    border-bottom: 1px solid var(--border);
+    display: none !important;
   }
+
   .hero-copy form input {
-    width: 100%;
-    padding: 0.78rem 0.75rem;
+    width: 100% !important;
+    padding: 0.78rem 0.75rem !important;
+    border-bottom: 1px solid var(--border) !important;
   }
+
   .hero-copy form button {
-    width: 100%;
-    padding: 0.82rem 1rem;
-    border-radius: 0 0 var(--radius) var(--radius);
+    width: 100% !important;
+    padding: 0.82rem 1rem !important;
+    border-radius: 0 0 var(--radius) var(--radius) !important;
   }
+
+  /* Section padding reduction */
+  section {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* ── 640px: features single column ── */
+@media (max-width: 640px) {
+  .hero-grid {
+    gap: 1.25rem;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(1.8rem, 8.5vw, 2.4rem);
+  }
+
+  .hero-copy p {
+    font-size: 0.9375rem;
+  }
+
+  .hero-copy form {
+    max-width: 100%;
+  }
+
+  .hero-copy form > div {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    border-radius: var(--radius) !important;
+  }
+
+  .hero-copy form input {
+    width: 100% !important;
+    padding: 0.78rem 0.75rem !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+
+  .hero-copy form button {
+    width: 100% !important;
+    padding: 0.82rem 1rem !important;
+    border-radius: 0 0 var(--radius) var(--radius) !important;
+  }
+
+  .features-grid-flagship,
+  .features-grid-trio {
+    grid-template-columns: 1fr !important;
+  }
+
+  .feature-card,
+  .feature-card-highlight {
+    width: 100% !important;
+  }
+
   .footer-links {
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
   }
+
   .app-footer {
     padding-top: 2rem;
   }
 }
 
-/* ── Nav active link ── */
-.nav-link-active { color: var(--brand) !important; font-weight: 600; }
-
-/* ── Desktop Responsive Overrides ── */
-
-/* ─── 1920px+: Widen the content container so it uses more screen space ─── */
-@media (min-width: 1600px) {
-  .hero-grid,
-  .footer-container,
-  .footer-bottom,
-  header nav {
-    max-width: 1400px !important;
+/* ── 480px: smallest phones ── */
+@media (max-width: 480px) {
+  .hero-copy h1,
+  .dashboard-topbar h1,
+  .report-title,
+  .audit-copy h1,
+  .auth-header h1 {
+    font-size: 1.6rem !important;
+    letter-spacing: -0.025em;
   }
 
-  section > div[style*="max-width: 1120px"],
-  section > div[style*="maxWidth: '1120px'"] {
-    max-width: 1400px !important;
-  }
-
-  .dashboard-shell,
-  .report-shell,
-  .audit-shell {
-    max-width: 1400px;
-  }
-}
-
-/* ─── 1024px: Fix cramped grid columns ─── */
-@media (max-width: 1100px) {
-  /* Score grid: drop from 4 to 3 cols to avoid squishing */
-  .score-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-
-  /* Report score grid: drop from 5 to 3 cols */
+  .score-grid,
   .report-score-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-columns: 1fr !important;
   }
 
-  /* AEO/GEO check grid: drop from 5 to 3 cols */
-  .aeo-check-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-
-  /* Recommendations: drop from 4 to 2 cols */
-  .recommendation-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  /* Dashboard lower grid: ensure sidebar has enough room */
-  .dashboard-lower-grid {
-    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
-  }
-
-  /* Feature flagship: 3 cols still works at 1024, keep it */
-  /* Feature trio: 3 cols still works at 1024, keep it */
-
-  /* Feature banner: adjust so text side doesn't squish */
-  .feature-banner-content {
-    grid-template-columns: 1fr 300px;
-  }
-}
-
-/* ─── 1024px and below: further reduce columns ─── */
-@media (max-width: 1060px) {
-  /* Dashboard: stack lower grid when sidebar gets too tight */
-  .dashboard-lower-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* Report content layout: drop from 3 to 2 cols */
-  .report-content-layout {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-}
-
-/* ─── General desktop spacing polish ─── */
-@media (min-width: 1024px) {
-  /* Ensure dashboard and report pages have proper top padding */
-  .dashboard-page {
-    padding-top: 3.5rem;
-    padding-bottom: 3.5rem;
-  }
-
-  .report-page {
-    padding-top: 3.5rem;
-    padding-bottom: 3.5rem;
-  }
-
-  /* Audit table: ensure it uses full width in its container */
-  .audit-table {
+  .report-actions .btn-primary,
+  .dashboard-actions .btn-primary {
     width: 100%;
-    min-width: unset;
-  }
-
-  /* Score cells: enforce consistent min height */
-  .score-cell {
-    min-height: 120px;
-  }
-
-  /* Topbar row: consistent vertical rhythm */
-  .dashboard-topbar {
-    margin-bottom: 1.5rem;
-  }
-}
-
-/* ─── 1366px: fine-tune mid-desktop ─── */
-@media (min-width: 1200px) and (max-width: 1500px) {
-  /* Score grid at 1366px: 5 cells in dashboard — 3+2 wrapping looks better
-     than 5 tiny cols. Use auto-fill with a sensible min so they stay readable. */
-  .score-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  }
-
-  /* AEO check grid: comfortable 4-col at 1366px */
-  .aeo-check-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  }
-
-  /* Recommendation list: 3-col at 1366px */
-  .recommendation-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-}
-
-@media (max-width: 780px) {
-  html, body {
-    overflow-x: hidden;
-    width: 100%;
-  }
-
-  /* Hide the orphaned url-icon on mobile instead of making it a block */
-  .hero-copy form .url-icon,
-  .audit-copy form .url-icon {
-    display: none !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .auth-panel {
-    padding: 1.5rem !important;
-    margin: 0 auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    width: 100%;
-  }
-
-  .audit-table {
-    min-width: 600px; /* Prevent columns from squishing and breaking layout */
-  }
-
-  .dashboard-topbar, .report-header {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 1rem;
-  }
-
-  /* Cards */
-  .feature-card, .feature-card-highlight, .score-cell {
-    width: 100% !important;
-  }
-}
-
-@media (max-width: 430px) {
-  /* Smaller font for extra small devices to prevent wrapping and clipping */
-  .hero-copy h1, .dashboard-topbar h1, .report-title, .audit-copy h1 {
-    font-size: 1.7rem !important;
-  }
-
-  /* Make buttons full width on the smallest screens */
-  .btn-primary, .btn-ghost {
-    width: 100%;
-    margin-bottom: 0.5rem;
     justify-content: center;
   }
 
@@ -2797,11 +2754,43 @@ img, svg { display: inline-block; }
     flex-direction: column;
     align-items: stretch;
   }
-  
-  /* Fix gap in forms on small screens */
+
   .label-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
   }
+
+  /* Reduce section padding on tiny screens */
+  .dashboard-page,
+  .report-page,
+  .audit-page,
+  .auth-page {
+    padding: 1.5rem 0.85rem !important;
+  }
+
+  section {
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+  }
 }
+
+/* ═══════════════════════════════════════════════════
+   GLOBAL OVERFLOW GUARD — catch-all
+═══════════════════════════════════════════════════ */
+html {
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+img, iframe, video, canvas, embed, object {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Nav active link */
+.nav-link-active { color: var(--brand) !important; font-weight: 600; }

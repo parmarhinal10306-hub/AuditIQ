@@ -289,12 +289,11 @@ export default function LandingPage() {
             </div>
 
             {/* SEO + AEO + GEO Score */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
+            <div className="grid grid-cols-1 sm:grid-cols-3" style={{
               borderBottom: '1px solid var(--border)',
             }}>
               {/* SEO */}
-              <div style={{ padding: '1.25rem', borderRight: '1px solid var(--border)', textAlign: 'center' }}>
+              <div style={{ padding: '1.25rem', textAlign: 'center' }} className="border-b sm:border-b-0 sm:border-r border-[var(--border)]">
                 <div style={{
                   fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
                   letterSpacing: '0.06em', color: 'var(--text-muted)', marginBottom: '0.65rem',
@@ -304,7 +303,7 @@ export default function LandingPage() {
               </div>
 
               {/* AEO */}
-              <div style={{ padding: '1.25rem', borderRight: '1px solid var(--border)', textAlign: 'center' }}>
+              <div style={{ padding: '1.25rem', textAlign: 'center' }} className="border-b sm:border-b-0 sm:border-r border-[var(--border)]">
                 <div style={{
                   fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase',
                   letterSpacing: '0.06em', color: 'var(--text-muted)', marginBottom: '0.65rem',
@@ -325,14 +324,12 @@ export default function LandingPage() {
             </div>
 
             {/* Critical Issues + Warnings */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: '1fr 1fr',
+            <div className="grid grid-cols-1 sm:grid-cols-2" style={{
               borderBottom: '1px solid var(--border)',
             }}>
               {/* Critical */}
-              <div style={{
+              <div className="border-b sm:border-b-0 sm:border-r border-[var(--border)]" style={{
                 padding: '0.9rem 1.25rem',
-                borderRight: '1px solid var(--border)',
                 display: 'flex', alignItems: 'center', gap: 10,
               }}>
                 <div style={{
@@ -646,17 +643,17 @@ export default function LandingPage() {
                   Prioritized Action Queue
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', color: 'var(--text-primary)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', color: 'var(--text-primary)', minWidth: 0 }}>
                     <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', fontSize: '0.65rem', fontWeight: 700, padding: '1px 6px', borderRadius: 4, flexShrink: 0 }}>HIGH</span>
-                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Add missing Organization Schema</span>
+                    <span style={{ minWidth: 0, lineHeight: 1.4 }}>Add missing Organization Schema</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', color: 'var(--text-primary)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', color: 'var(--text-primary)', minWidth: 0 }}>
                     <span style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', fontSize: '0.65rem', fontWeight: 700, padding: '1px 6px', borderRadius: 4, flexShrink: 0 }}>MED</span>
-                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Optimize H2 tags for AI answer engines</span>
+                    <span style={{ minWidth: 0, lineHeight: 1.4 }}>Optimize H2 tags for AI answer engines</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', color: 'var(--text-primary)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem', color: 'var(--text-primary)', minWidth: 0 }}>
                     <span style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontSize: '0.65rem', fontWeight: 700, padding: '1px 6px', borderRadius: 4, flexShrink: 0 }}>LOW</span>
-                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Compress hero background PNG assets</span>
+                    <span style={{ minWidth: 0, lineHeight: 1.4 }}>Compress hero background PNG assets</span>
                   </div>
                 </div>
               </div>
