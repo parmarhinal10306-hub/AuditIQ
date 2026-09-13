@@ -253,7 +253,7 @@ export default function AuditReportPage() {
             {pdfError && (
               <p
                 role="alert"
-                style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '0.35rem', whiteSpace: 'nowrap' }}
+                style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '0.35rem' }}
               >
                 {pdfError}
               </p>

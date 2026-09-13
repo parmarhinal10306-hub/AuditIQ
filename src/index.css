@@ -2794,3 +2794,169 @@ img, iframe, video, canvas, embed, object {
 
 /* Nav active link */
 .nav-link-active { color: var(--brand) !important; font-weight: 600; }
+
+/* ═══════════════════════════════════════════════════════════════
+   AUDIT REPORT — TARGETED MOBILE OVERFLOW FIX
+   Covers 360px, 390px, 430px viewports precisely.
+   These rules are last so they win all specificity battles.
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Shell & page container — always full-width, never overflow ── */
+.report-page {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.report-shell {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* ── Score cells — never shrink below zero, always fill column ── */
+.score-cell {
+  min-width: 0;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* ── Panels — constrained ── */
+.panel-panel {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* ── Issue row top (title + badge flex) ── */
+.issue-row-top {
+  min-width: 0;
+}
+
+.issue-row-top h3 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ── AEO / GEO check head ── */
+.aeo-check-head {
+  min-width: 0;
+}
+
+.aeo-check-head span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ── Recommendation card ── */
+.recommendation {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.recommendation h3,
+.recommendation p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ── Long URLs in report meta ── */
+.report-url {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* ── Report meta row ── */
+.report-meta {
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+@media (max-width: 480px) {
+  /* Padding reduction */
+  .report-page {
+    padding: 1.25rem 0.75rem !important;
+  }
+
+  /* Header stacks vertically */
+  .report-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+
+  /* Action buttons fill full width */
+  .report-header > div:last-child {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.6rem !important;
+  }
+
+  .report-header .btn-primary {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Score grid: 1 column on tiny screens */
+  .report-score-section .grid,
+  .report-score-section [class*="grid-cols"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Section title rows wrap */
+  .section-title-row {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Score cells full width */
+  .score-cell {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Panels full width */
+  .panel-panel {
+    width: 100% !important;
+  }
+
+  /* AEO / GEO check cards */
+  .aeo-check {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Recommendation cards */
+  .recommendation {
+    width: 100% !important;
+  }
+
+  /* Fix-block paragraph text */
+  .fix-block p,
+  .aeo-check p,
+  .issue-row p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 430px) {
+  .report-page {
+    padding: 1rem 0.65rem !important;
+  }
+
+  .report-title {
+    font-size: 1.5rem !important;
+  }
+
+  /* All nested grids collapse to 1 col */
+  .report-shell [class*="grid-cols-2"],
+  .report-shell [class*="grid-cols-3"] {
+    grid-template-columns: 1fr !important;
+  }
+}
