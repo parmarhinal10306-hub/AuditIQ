@@ -28,14 +28,21 @@ export default function LoginPage() {
         body: JSON.stringify({ email: email.trim(), password })
       })
 
-      const data = await response.json()
+      let data
+      try {
+        data = await response.json()
+      } catch (jsonErr) {
+        data = null
+      }
 
-      if (!response.ok) {
-        setNotice(data.message || 'Login failed.')
-      } else {
+      if (!response.ok || !data) {
+        setNotice(data?.message || 'Login failed. Please check your credentials.')
+      } else if (data.success && data.data && data.data.token) {
         login(data.data, data.data.token)
         setNotice('Login successful! Loading dashboard...')
         setTimeout(() => navigate('/dashboard'), 1000)
+      } else {
+        setNotice(data?.message || 'Login failed.')
       }
     } catch (err) {
       setNotice('Unable to connect to the server. Please try again later.')

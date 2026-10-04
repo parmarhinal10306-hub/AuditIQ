@@ -25,12 +25,17 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email: email.trim() })
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonErr) {
+        data = null;
+      }
 
-      if (!response.ok) {
-        setNotice(data.message || 'Something went wrong.');
+      if (!response.ok || !data) {
+        setNotice(data?.message || 'Something went wrong.');
       } else {
-        setNotice(data.message);
+        setNotice(data.message || 'If an account exists, a reset link was generated.');
         if (data.resetToken) {
           setResetToken(data.resetToken);
         }

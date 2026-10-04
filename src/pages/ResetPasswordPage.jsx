@@ -33,12 +33,17 @@ export default function ResetPasswordPage() {
         body: JSON.stringify({ token, password })
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonErr) {
+        data = null;
+      }
 
-      if (!response.ok) {
-        setNotice(data.message || 'Something went wrong.');
+      if (!response.ok || !data) {
+        setNotice(data?.message || 'Something went wrong.');
       } else {
-        setNotice(data.message + ' Redirecting to login...');
+        setNotice((data.message || 'Password reset successful.') + ' Redirecting to login...');
         setTimeout(() => navigate('/login'), 2000);
       }
     } catch (err) {

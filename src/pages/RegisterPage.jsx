@@ -45,13 +45,20 @@ export default function RegisterPage() {
         })
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonErr) {
+        data = null;
+      }
 
-      if (!response.ok) {
-        setNotice(data.message || 'Registration failed.');
-      } else {
+      if (!response.ok || !data) {
+        setNotice(data?.message || 'Registration failed.');
+      } else if (data.success) {
         setNotice('Registration successful! Redirecting to setup...');
         setTimeout(() => navigate('/login'), 1500);
+      } else {
+        setNotice(data?.message || 'Registration failed.');
       }
     } catch (error) {
       setNotice('Unable to connect to the server. Please try again later.');
