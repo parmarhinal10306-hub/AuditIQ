@@ -151,8 +151,16 @@ const registerUser = async (req, res, next) => {
  */
 const verifyEmail = async (req, res, next) => {
   try {
-    const token = req.body.token || req.query.token;
+    const rawToken = req.body?.token || req.query?.token;
 
+    if (!rawToken || typeof rawToken !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token is required',
+      });
+    }
+
+    const token = rawToken.trim();
     if (!token) {
       return res.status(400).json({
         success: false,
@@ -160,21 +168,37 @@ const verifyEmail = async (req, res, next) => {
       });
     }
 
-    const hashedToken = crypto.createHash('sha256').update(token.trim()).digest('hex');
-    const user = await findUserByVerificationToken(hashedToken);
+    // Safe diagnostic logging (never prints full raw token, API keys, or passwords)
+    console.log(`[authController] verifyEmail request: tokenLength=${token.length}, prefix=${token.substring(0, 4)}...`);
 
-    if (!user) {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const lookup = await findUserByVerificationToken(hashedToken);
+
+    if (!lookup) {
+      console.warn(`[authController] verifyEmail lookup failed: token not found or expired (hash prefix: ${hashedToken.substring(0, 6)}...)`);
       return res.status(400).json({
         success: false,
         message: 'This verification link is invalid or has expired. Please request a new verification link.',
       });
     }
 
-    // Mark user as verified and clear tokens
+    const { user, isAlreadyVerified } = lookup;
+
+    if (isAlreadyVerified) {
+      console.log(`[authController] verifyEmail idempotent: User ${user.email} is already verified.`);
+      return res.status(200).json({
+        success: true,
+        alreadyVerified: true,
+        message: 'Your email address has already been successfully verified! You can now log in.',
+      });
+    }
+
+    // Mark user as verified, clear active token, but retain lastVerifiedToken for idempotency
     await updateUser(user._id, {
       isVerified: true,
       verificationToken: null,
       verificationTokenExpire: null,
+      lastVerifiedToken: hashedToken,
       verifiedAt: new Date(),
     });
 
@@ -207,11 +231,20 @@ const resendVerification = async (req, res, next) => {
     const cleanEmail = email.toLowerCase().trim();
     const user = await findUserByEmail(cleanEmail);
 
-    // If user doesn't exist or is already verified, return generic response to prevent enumeration
-    if (!user || user.isVerified === true) {
+    // If user doesn't exist, return generic response to prevent enumeration
+    if (!user) {
       return res.status(200).json({
         success: true,
         message: 'If an unverified account exists with this email, a verification link has been sent.',
+      });
+    }
+
+    // If user is already verified, inform them directly so they are not trapped in a resend loop
+    if (user.isVerified === true) {
+      return res.status(200).json({
+        success: true,
+        alreadyVerified: true,
+        message: 'Your email address is already verified! You can log in directly.',
       });
     }
 

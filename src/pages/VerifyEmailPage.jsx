@@ -1,16 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { API_BASE_URL } from '../config/api'
 
 export default function VerifyEmailPage() {
   const [searchParams] = useSearchParams()
-  const token = searchParams.get('token')
+  const rawToken = searchParams.get('token')
+  const token = rawToken ? rawToken.trim() : ''
 
   const [status, setStatus] = useState('loading') // 'loading' | 'success' | 'error' | 'no_token'
   const [message, setMessage] = useState('')
   const [resendEmail, setResendEmail] = useState('')
   const [resendStatus, setResendStatus] = useState('')
   const [isResending, setIsResending] = useState(false)
+  const [isAlreadyVerified, setIsAlreadyVerified] = useState(false)
+
+  const requestedTokenRef = useRef(null)
 
   useEffect(() => {
     if (!token) {
@@ -18,6 +22,11 @@ export default function VerifyEmailPage() {
       setMessage('No verification token found in URL. Please check your verification link.')
       return
     }
+
+    if (requestedTokenRef.current === token) {
+      return
+    }
+    requestedTokenRef.current = token
 
     let isMounted = true
 
@@ -63,6 +72,7 @@ export default function VerifyEmailPage() {
 
     setIsResending(true)
     setResendStatus('Sending verification link...')
+    setIsAlreadyVerified(false)
     try {
       const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
         method: 'POST',
@@ -71,7 +81,12 @@ export default function VerifyEmailPage() {
       })
 
       const data = await response.json()
-      setResendStatus(data.message || 'If an account exists, a verification link has been sent.')
+      if (data.alreadyVerified) {
+        setIsAlreadyVerified(true)
+        setResendStatus(data.message || 'Your email address is already verified! You can log in directly.')
+      } else {
+        setResendStatus(data.message || 'If an account exists, a verification link has been sent.')
+      }
     } catch {
       setResendStatus('Unable to reach server. Please try again later.')
     } finally {
@@ -175,15 +190,33 @@ export default function VerifyEmailPage() {
                   </div>
 
                   {resendStatus && (
-                    <div className="auth-notice" style={{ marginBottom: '1rem' }}>
-                      <span aria-hidden="true">i</span>
+                    <div
+                      className="auth-notice"
+                      style={{
+                        marginBottom: '1rem',
+                        backgroundColor: isAlreadyVerified ? '#dcfce7' : undefined,
+                        borderColor: isAlreadyVerified ? '#86efac' : undefined,
+                        color: isAlreadyVerified ? '#15803d' : undefined,
+                      }}
+                    >
+                      <span aria-hidden="true">{isAlreadyVerified ? '✓' : 'i'}</span>
                       <span>{resendStatus}</span>
                     </div>
                   )}
 
-                  <button type="submit" className="btn-primary auth-button" disabled={isResending}>
-                    {isResending ? 'Sending…' : 'Resend Verification Link'}
-                  </button>
+                  {isAlreadyVerified ? (
+                    <Link
+                      to="/login"
+                      className="btn-primary auth-button"
+                      style={{ display: 'flex', textDecoration: 'none', justifyContent: 'center' }}
+                    >
+                      Go to Login
+                    </Link>
+                  ) : (
+                    <button type="submit" className="btn-primary auth-button" disabled={isResending}>
+                      {isResending ? 'Sending…' : 'Resend Verification Link'}
+                    </button>
+                  )}
                 </form>
               </div>
 

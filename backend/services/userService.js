@@ -18,6 +18,7 @@ const createUser = async (userData) => {
     isVerified: userData.isVerified ?? false,
     verificationToken: userData.verificationToken || null,
     verificationTokenExpire: userData.verificationTokenExpire || null,
+    lastVerifiedToken: null,
     resetPasswordToken: null,
     resetPasswordExpire: null,
     createdAt: new Date(),
@@ -76,17 +77,44 @@ const updateUser = async (userId, updateData) => {
 };
 
 /**
- * Finds a user with an active, non-expired verification token.
+ * Finds a user with an active, non-expired verification token,
+ * or a user already verified with this token (for idempotency and bot-protection).
  *
  * @param {string} verificationToken - SHA-256 hashed token
  */
 const findUserByVerificationToken = async (verificationToken) => {
   if (!verificationToken) return null;
   const collection = getCollection();
-  return await collection.findOne({
+  const nowMs = Date.now();
+  const nowDate = new Date(nowMs);
+
+  // 1. Check for pending verification token (supporting both Number and Date expiry types)
+  const pendingUser = await collection.findOne({
     verificationToken,
-    verificationTokenExpire: { $gt: Date.now() },
+    $or: [
+      { verificationTokenExpire: { $gt: nowMs } },
+      { verificationTokenExpire: { $gt: nowDate } },
+      { verificationTokenExpire: null },
+    ],
   });
+
+  if (pendingUser) {
+    return { user: pendingUser, isAlreadyVerified: false };
+  }
+
+  // 2. Check if user was already verified by this token (scanner prefetch, double-click, refresh)
+  const alreadyVerifiedUser = await collection.findOne({
+    $or: [
+      { lastVerifiedToken: verificationToken },
+      { verificationToken, isVerified: true },
+    ],
+  });
+
+  if (alreadyVerifiedUser) {
+    return { user: alreadyVerifiedUser, isAlreadyVerified: true };
+  }
+
+  return null;
 };
 
 /**
@@ -97,9 +125,15 @@ const findUserByVerificationToken = async (verificationToken) => {
 const findUserByResetToken = async (resetPasswordToken) => {
   if (!resetPasswordToken) return null;
   const collection = getCollection();
+  const nowMs = Date.now();
+  const nowDate = new Date(nowMs);
   return await collection.findOne({
     resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now() },
+    $or: [
+      { resetPasswordExpire: { $gt: nowMs } },
+      { resetPasswordExpire: { $gt: nowDate } },
+      { resetPasswordExpire: null },
+    ],
   });
 };
 
