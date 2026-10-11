@@ -123,6 +123,16 @@ const sendEmail = async ({ to, subject, html, text }) => {
     try {
       return await sendViaResend({ to, subject, html, text });
     } catch (err) {
+      // If Resend failed (e.g. sandbox restriction for non-owner recipient) and SMTP is configured, auto-fallback to SMTP
+      if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+        console.warn(`[emailService] Resend send failed (${err.message}). Attempting fallback to SMTP...`);
+        try {
+          return await sendViaSmtp({ to, subject, html, text });
+        } catch (smtpErr) {
+          console.error(`[emailService] SMTP fallback also failed: ${smtpErr.message}`);
+        }
+      }
+
       return {
         success: false,
         provider: 'resend',
