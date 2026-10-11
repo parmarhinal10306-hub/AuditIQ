@@ -13,23 +13,34 @@ const PORT = process.env.PORT || 5000;
 /* ── Global middleware ── */
 app.use(helmet());
 
-const allowedOrigins = [
-  'https://audit-iq-navy.vercel.app',
-  process.env.FRONTEND_URL,
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'http://localhost:5174',
-  'http://127.0.0.1:5174'
-].filter(Boolean).map(url => url.trim().replace(/\/+$/, ''));
+// Robust CORS handling supporting single or comma-separated origins, trailing slash normalization, and Vercel subdomains
+const configuredFrontends = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map(url => url.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
+const defaultDevFrontends = ['http://localhost:5173', 'http://localhost:4173', 'http://localhost:3000'];
+const allowedOrigins = Array.from(new Set([...configuredFrontends, ...defaultDevFrontends]));
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes(origin.replace(/\/+$/, ''))) {
+    // Allow non-browser requests (mobile apps, server-to-server, curl, Render health checks)
+    if (!origin) return callback(null, true);
+
+    const normalizedOrigin = origin.replace(/\/+$/, '');
+    const isAllowed = allowedOrigins.includes(normalizedOrigin) ||
+      /^https:\/\/audit-iq-[a-z0-9-]+.*\.vercel\.app$/.test(normalizedOrigin) ||
+      /^https:\/\/audit-iq.*\.vercel\.app$/.test(normalizedOrigin);
+
+    if (isAllowed) {
       return callback(null, true);
     }
+
+    console.warn(`[cors] Rejected origin: ${origin}`);
     return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 
 app.use(express.json());
@@ -40,7 +51,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', generalLimiter);
 
 /* ── Routes ── */
-
 const authRouter      = require('./routes/auth');
 const auditRouter     = require('./routes/audits');
 const dashboardRouter = require('./routes/dashboard');

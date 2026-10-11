@@ -1,57 +1,246 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { createUser, findUserByEmail, updateUser, findUserByResetToken } = require('../services/userService');
 const crypto = require('crypto');
+const {
+  createUser,
+  findUserByEmail,
+  findUserById,
+  updateUser,
+  findUserByVerificationToken,
+  findUserByResetToken,
+} = require('../services/userService');
+const {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  isEmailConfigured,
+} = require('../services/emailService');
+const AppError = require('../utils/AppError');
+
+const getFrontendUrl = () => {
+  const url = process.env.FRONTEND_URL || 'http://localhost:5173';
+  return url.replace(/\/+$/, '');
+};
 
 const generateToken = (userId, email) => {
-  return jwt.sign({ userId, email }, process.env.JWT_SECRET, {
+  return jwt.sign({ userId, email }, process.env.JWT_SECRET || 'fallback_secret', {
     expiresIn: '30d',
   });
 };
 
-const AppError = require('../utils/AppError');
-
 /**
  * POST /api/auth/register
- * Validates fields, duplicates, and securely hashes password to store.
+ * Creates a new user account, generates an expiring email verification token,
+ * and sends an email verification link.
  */
 const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
-    // Validate fields
     if (!name || !email || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Please provide all required fields (name, email, password)' 
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields (name, email, password)',
       });
     }
 
-    // Check if user already exists
-    const existingUser = await findUserByEmail(email);
-    if (existingUser) {
-      throw new AppError('User already exists with this email', 400);
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long',
+      });
     }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const existingUser = await findUserByEmail(cleanEmail);
+
+    if (existingUser && existingUser.isVerified !== false) {
+      throw new AppError('An account with this email already exists', 400);
+    }
+
+    // Generate secure 32-byte verification token
+    const rawVerificationToken = crypto.randomBytes(32).toString('hex');
+    const hashedVerificationToken = crypto.createHash('sha256').update(rawVerificationToken).digest('hex');
+    const verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Create user (Never passes plain-text password)
-    const createdUser = await createUser({
-      name,
-      email,
-      passwordHash,
+    let user;
+    if (existingUser && existingUser.isVerified === false) {
+      // Re-registration of unverified account: update credentials and refresh token
+      await updateUser(existingUser._id, {
+        name: name.trim(),
+        passwordHash,
+        verificationToken: hashedVerificationToken,
+        verificationTokenExpire,
+      });
+      user = { ...existingUser, name: name.trim() };
+    } else {
+      // Create new user
+      user = await createUser({
+        name: name.trim(),
+        email: cleanEmail,
+        passwordHash,
+        isVerified: false,
+        verificationToken: hashedVerificationToken,
+        verificationTokenExpire,
+      });
+    }
+
+    // Construct verification link
+    const verificationUrl = `${getFrontendUrl()}/verify-email?token=${rawVerificationToken}`;
+
+    // Send verification email
+    let emailResult = { success: false };
+    try {
+      emailResult = await sendVerificationEmail({
+        to: cleanEmail,
+        name: user.name,
+        verificationUrl,
+      });
+    } catch (emailErr) {
+      console.error(`[authController] Failed to send verification email to ${cleanEmail}:`, emailErr.message);
+    }
+
+    // Honest reporting based on email status
+    if (emailResult.success) {
+      return res.status(201).json({
+        success: true,
+        message: 'Registration successful! A verification email has been sent to your address. Please verify your account before logging in.',
+        emailSent: true,
+      });
+    }
+
+    // If email delivery could not be performed
+    if (emailResult.unconfigured) {
+      const devMessage = process.env.NODE_ENV !== 'production'
+        ? `Account created! Email provider not configured on server. Verification link for local testing: ${verificationUrl}`
+        : 'Registration successful! However, email delivery is currently unconfigured on the server. Please contact support.';
+      
+      return res.status(201).json({
+        success: true,
+        message: devMessage,
+        emailSent: false,
+        requiresConfig: true,
+      });
+    }
+
+    // Email provider configured but failed to deliver
+    return res.status(201).json({
+      success: true,
+      message: 'Account created, but we encountered an issue delivering your verification email. Please use the resend verification link to try again.',
+      emailSent: false,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/auth/verify-email
+ * Verifies the user's email address using the expiring token.
+ */
+const verifyEmail = async (req, res, next) => {
+  try {
+    const token = req.body.token || req.query.token;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token is required',
+      });
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token.trim()).digest('hex');
+    const user = await findUserByVerificationToken(hashedToken);
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'This verification link is invalid or has expired. Please request a new verification link.',
+      });
+    }
+
+    // Mark user as verified and clear tokens
+    await updateUser(user._id, {
+      isVerified: true,
+      verificationToken: null,
+      verificationTokenExpire: null,
+      verifiedAt: new Date(),
     });
 
-    res.status(201).json({
+    console.log(`[authController] User successfully verified: ${user.email}`);
+
+    res.status(200).json({
       success: true,
-      data: {
-        _id: createdUser._id,
-        name: createdUser.name,
-        email: createdUser.email,
-        token: generateToken(createdUser._id, createdUser.email),
-      },
+      message: 'Your email address has been successfully verified! You can now log in.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/auth/resend-verification
+ * Resends a verification email with a fresh expiring token.
+ */
+const resendVerification = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your email address',
+      });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const user = await findUserByEmail(cleanEmail);
+
+    // If user doesn't exist or is already verified, return generic response to prevent enumeration
+    if (!user || user.isVerified === true) {
+      return res.status(200).json({
+        success: true,
+        message: 'If an unverified account exists with this email, a verification link has been sent.',
+      });
+    }
+
+    // Generate fresh token
+    const rawVerificationToken = crypto.randomBytes(32).toString('hex');
+    const hashedVerificationToken = crypto.createHash('sha256').update(rawVerificationToken).digest('hex');
+    const verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000;
+
+    await updateUser(user._id, {
+      verificationToken: hashedVerificationToken,
+      verificationTokenExpire,
+    });
+
+    const verificationUrl = `${getFrontendUrl()}/verify-email?token=${rawVerificationToken}`;
+
+    let emailResult = { success: false };
+    try {
+      emailResult = await sendVerificationEmail({
+        to: cleanEmail,
+        name: user.name,
+        verificationUrl,
+      });
+    } catch (emailErr) {
+      console.error(`[authController] Resend verification email failed for ${cleanEmail}:`, emailErr.message);
+    }
+
+    if (emailResult.unconfigured && process.env.NODE_ENV !== 'production') {
+      return res.status(200).json({
+        success: true,
+        message: `Email provider not configured. Dev verification link: ${verificationUrl}`,
+        emailSent: false,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'If an unverified account exists with this email, a verification link has been sent.',
     });
   } catch (error) {
     next(error);
@@ -60,27 +249,39 @@ const registerUser = async (req, res, next) => {
 
 /**
  * POST /api/auth/login
- * Validates existence and securely compares hash before issuing JWT token.
+ * Validates credentials and verifies email confirmation before issuing JWT token.
  */
 const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Please provide both email and password' 
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both email and password',
       });
     }
 
-    const user = await findUserByEmail(email);
+    const cleanEmail = email.toLowerCase().trim();
+    const user = await findUserByEmail(cleanEmail);
+
     if (!user) {
-      throw new AppError('Invalid credentials', 401);
+      throw new AppError('Invalid email or password', 401);
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      throw new AppError('Invalid credentials', 401);
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    // Require email verification (backward compatible with legacy accounts where isVerified was undefined)
+    if (user.isVerified === false) {
+      return res.status(403).json({
+        success: false,
+        isUnverified: true,
+        email: user.email,
+        message: 'Please verify your email address before logging in. Check your inbox for the verification link.',
+      });
     }
 
     res.status(200).json({
@@ -89,6 +290,7 @@ const loginUser = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        isVerified: user.isVerified ?? true,
         token: generateToken(user._id, user.email),
       },
     });
@@ -97,49 +299,106 @@ const loginUser = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/auth/forgot-password
+ * Generates an expiring password reset token and sends a reset email.
+ * Never returns the raw reset token in the response JSON.
+ */
 const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
+
     if (!email) {
-      return res.status(400).json({ success: false, message: 'Please provide an email' });
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide an email address',
+      });
     }
 
-    const user = await findUserByEmail(email);
+    const cleanEmail = email.toLowerCase().trim();
+    const user = await findUserByEmail(cleanEmail);
+
+    const genericSuccessMessage = 'If an account exists with that email address, a password reset link has been sent.';
+
+    // Do not leak whether the user exists
     if (!user) {
-      return res.status(200).json({ success: true, message: 'If an account exists, a reset link was generated.' });
+      return res.status(200).json({
+        success: true,
+        message: genericSuccessMessage,
+      });
     }
 
-    const resetToken = crypto.randomBytes(20).toString('hex');
-    const resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    const resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+    // Generate random 32-byte reset token
+    const rawResetToken = crypto.randomBytes(32).toString('hex');
+    const hashedResetToken = crypto.createHash('sha256').update(rawResetToken).digest('hex');
+    const resetPasswordExpire = Date.now() + 60 * 60 * 1000; // 1 hour
 
     await updateUser(user._id, {
-      resetPasswordToken,
-      resetPasswordExpire
+      resetPasswordToken: hashedResetToken,
+      resetPasswordExpire,
     });
 
+    const resetUrl = `${getFrontendUrl()}/reset-password/${rawResetToken}`;
+
+    let emailResult = { success: false };
+    try {
+      emailResult = await sendPasswordResetEmail({
+        to: cleanEmail,
+        name: user.name,
+        resetUrl,
+      });
+    } catch (emailErr) {
+      console.error(`[authController] Password reset email failed for ${cleanEmail}:`, emailErr.message);
+    }
+
+    if (emailResult.unconfigured && process.env.NODE_ENV !== 'production') {
+      return res.status(200).json({
+        success: true,
+        message: `Email provider not configured on server. Dev reset link: ${resetUrl}`,
+        emailSent: false,
+      });
+    }
+
+    // Never return resetToken in the response body!
     res.status(200).json({
       success: true,
-      message: 'If an account exists, a reset link was generated.',
-      resetToken
+      message: genericSuccessMessage,
     });
   } catch (error) {
     next(error);
   }
 };
 
+/**
+ * POST /api/auth/reset-password
+ * Resets the user's password using the token provided in the email link.
+ */
 const resetPassword = async (req, res, next) => {
   try {
     const { token, password } = req.body;
+
     if (!token || !password) {
-      return res.status(400).json({ success: false, message: 'Invalid request' });
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both the reset token and your new password',
+      });
     }
 
-    const resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
-    const user = await findUserByResetToken(resetPasswordToken);
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long',
+      });
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token.trim()).digest('hex');
+    const user = await findUserByResetToken(hashedToken);
 
     if (!user) {
-      throw new AppError('Invalid or expired token', 400);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired password reset link. Please request a new password reset.',
+      });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -148,10 +407,42 @@ const resetPassword = async (req, res, next) => {
     await updateUser(user._id, {
       passwordHash,
       resetPasswordToken: null,
-      resetPasswordExpire: null
+      resetPasswordExpire: null,
+      isVerified: true, // Resetting via email proves ownership of email
     });
 
-    res.status(200).json({ success: true, message: 'Password reset successful' });
+    console.log(`[authController] Password successfully reset for user: ${user.email}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Your password has been reset successfully! You can now log in with your new password.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/auth/me
+ * Returns current authenticated user profile.
+ */
+const getMe = async (req, res, next) => {
+  try {
+    const user = await findUserById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified ?? true,
+        createdAt: user.createdAt,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -160,6 +451,9 @@ const resetPassword = async (req, res, next) => {
 module.exports = {
   registerUser,
   loginUser,
+  verifyEmail,
+  resendVerification,
   forgotPassword,
   resetPassword,
+  getMe,
 };
