@@ -100,6 +100,7 @@ const registerUser = async (req, res, next) => {
         verificationUrl,
       });
     } catch (emailErr) {
+      emailResult = { success: false, error: emailErr.message };
       console.error(`[authController] Failed to send verification email to ${cleanEmail}:`, emailErr.message);
     }
 
@@ -126,11 +127,18 @@ const registerUser = async (req, res, next) => {
       });
     }
 
-    // Email provider configured but failed to deliver
+    // Email provider configured but failed to deliver - sanitize error to ensure no secret leaks
+    const safeError = (emailResult.error || '')
+      .replace(/re_[a-zA-Z0-9_]+/gi, '[REDACTED_KEY]')
+      .trim();
+
+    const failureReason = safeError ? ` Reason: ${safeError}` : '';
+
     return res.status(201).json({
       success: true,
-      message: 'Account created, but we encountered an issue delivering your verification email. Please use the resend verification link to try again.',
+      message: `Account created, but we encountered an issue delivering your verification email.${failureReason} Please verify your account or use the resend verification link.`,
       emailSent: false,
+      deliveryError: safeError || 'Delivery failed',
     });
   } catch (error) {
     next(error);
@@ -274,8 +282,8 @@ const loginUser = async (req, res, next) => {
       throw new AppError('Invalid email or password', 401);
     }
 
-    // Require email verification (backward compatible with legacy accounts where isVerified was undefined)
-    if (user.isVerified === false) {
+    // Require email verification - block unverified users while preserving legacy accounts
+    if (user.isVerified === false || (!user.isVerified && user.verificationToken)) {
       return res.status(403).json({
         success: false,
         isUnverified: true,

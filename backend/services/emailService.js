@@ -10,14 +10,17 @@ const nodemailer = require('nodemailer');
  */
 
 const getEmailFrom = () => {
-  return process.env.EMAIL_FROM || 'AuditIQ <onboarding@resend.dev>';
+  const raw = process.env.EMAIL_FROM;
+  if (!raw) return 'AuditIQ <onboarding@resend.dev>';
+  return raw.trim().replace(/^["']|["']$/g, '');
 };
 
 /**
  * Checks whether an email provider is configured in environment variables.
  */
 const isEmailConfigured = () => {
-  if (process.env.RESEND_API_KEY) return true;
+  const resendKey = (process.env.RESEND_API_KEY || '').trim().replace(/^["']|["']$/g, '');
+  if (resendKey) return true;
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) return true;
   return false;
 };
@@ -26,8 +29,14 @@ const isEmailConfigured = () => {
  * Sends an email using Resend API.
  */
 const sendViaResend = async ({ to, subject, html, text }) => {
-  const apiKey = process.env.RESEND_API_KEY;
+  const rawKey = process.env.RESEND_API_KEY;
+  if (!rawKey) {
+    throw new Error('RESEND_API_KEY is not set');
+  }
+  const apiKey = rawKey.trim().replace(/^["']|["']$/g, '');
   const from = getEmailFrom();
+
+  const recipient = Array.isArray(to) ? to : [to];
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -37,7 +46,7 @@ const sendViaResend = async ({ to, subject, html, text }) => {
     },
     body: JSON.stringify({
       from,
-      to: Array.isArray(to) ? to : [to],
+      to: recipient,
       subject,
       html,
       text,
@@ -47,8 +56,23 @@ const sendViaResend = async ({ to, subject, html, text }) => {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    const errorMsg = data.message || `Resend API returned status ${response.status}`;
-    console.error(`[emailService] Resend send error: ${errorMsg}`);
+    const rawMsg = data.message ||
+      data.error?.message ||
+      (data.name ? `${data.name}: ${data.message || 'Validation error'}` : null) ||
+      `HTTP status ${response.status}`;
+
+    // Provide clear, actionable context for common Resend restrictions
+    let extraContext = '';
+    if (response.status === 403 && typeof rawMsg === 'string' && rawMsg.toLowerCase().includes('testing emails')) {
+      extraContext = ' (Resend test domain onboarding@resend.dev only allows sending to the email of the Resend account owner. To send to any recipient, verify your domain at resend.com/domains)';
+    } else if (response.status === 403 && typeof rawMsg === 'string' && rawMsg.toLowerCase().includes('domain')) {
+      extraContext = ' (Sender domain is not verified in Resend. Please verify DNS records at resend.com/domains or use onboarding@resend.dev)';
+    } else if (response.status === 401) {
+      extraContext = ' (Invalid RESEND_API_KEY. Please verify the key in your Render dashboard)';
+    }
+
+    const errorMsg = `${rawMsg}${extraContext}`;
+    console.error(`[emailService] Resend send error (${response.status}): ${errorMsg}`);
     throw new Error(errorMsg);
   }
 
@@ -94,12 +118,29 @@ const sendEmail = async ({ to, subject, html, text }) => {
     throw new Error('Missing required email fields (to, subject)');
   }
 
-  if (process.env.RESEND_API_KEY) {
-    return await sendViaResend({ to, subject, html, text });
+  const resendKey = (process.env.RESEND_API_KEY || '').trim().replace(/^["']|["']$/g, '');
+  if (resendKey) {
+    try {
+      return await sendViaResend({ to, subject, html, text });
+    } catch (err) {
+      return {
+        success: false,
+        provider: 'resend',
+        error: err.message,
+      };
+    }
   }
 
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return await sendViaSmtp({ to, subject, html, text });
+    try {
+      return await sendViaSmtp({ to, subject, html, text });
+    } catch (err) {
+      return {
+        success: false,
+        provider: 'smtp',
+        error: err.message,
+      };
+    }
   }
 
   // No provider configured
