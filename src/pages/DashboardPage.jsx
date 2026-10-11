@@ -245,86 +245,96 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Score Overview */}
-        <section className="dashboard-score-section">
+        {/* ── Score Overview ─────────────────────────────────────── */}
+        <section className="dashboard-score-section" style={{ marginTop: '1.5rem' }}>
           <div className="section-title-row">
             <div>
               <span className="section-label">Score Overview</span>
               <h2>Performance Snapshot</h2>
             </div>
-            <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
+            <span className="db-live-badge">
+              <span className="db-live-dot" />
+              Live Data
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <article className="score-cell score-cell-primary break-words min-w-0">
-              <div className="score-head">
-                <span>Avg SEO Score</span>
-                <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
+          {/* Primary pillar scores */}
+          <div className="db-pillar-row">
+            <article className="db-score-card db-score-seo">
+              <div className="db-score-card-label">Avg SEO Score</div>
+              <div className="db-score-card-number">{ov.avgSeoScore}<span className="db-score-denom"> / 100</span></div>
+              <div className="db-score-bar-track">
+                <div className="db-score-bar-fill" style={{ width: `${ov.avgSeoScore ?? 0}%`, background: '#1d4ed8' }} />
               </div>
-              <div className="score-number">{ov.avgSeoScore} <span>/ 100</span></div>
             </article>
 
-            <article className="score-cell">
-              <div className="score-head">
-                <span>Avg AEO Score</span>
-                <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
+            <article className="db-score-card db-score-aeo">
+              <div className="db-score-card-label">Avg AEO Score</div>
+              <div className="db-score-card-number">{ov.avgAeoScore}<span className="db-score-denom"> / 100</span></div>
+              <div className="db-score-bar-track">
+                <div className="db-score-bar-fill" style={{ width: `${ov.avgAeoScore ?? 0}%`, background: '#b45309' }} />
               </div>
-              <div className="score-number">{ov.avgAeoScore} <span>/ 100</span></div>
             </article>
 
-            <article className="score-cell">
-              <div className="score-head">
-                <span>Avg GEO Score</span>
-                <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
+            <article className="db-score-card db-score-geo">
+              <div className="db-score-card-label">Avg GEO Score</div>
+              <div className="db-score-card-number">{ov.avgGeoScore}<span className="db-score-denom"> / 100</span></div>
+              <div className="db-score-bar-track">
+                <div className="db-score-bar-fill" style={{ width: `${ov.avgGeoScore ?? 0}%`, background: '#15803d' }} />
               </div>
-              <div className="score-number">{ov.avgGeoScore} <span>/ 100</span></div>
             </article>
+          </div>
 
-            <article className="score-cell">
-              <div className="score-head">
-                <span>Total Audits</span>
-                <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
-              </div>
-              <div className="score-number">{ov.totalAudits} <span>audits</span></div>
-            </article>
-
-            <article className="score-cell">
-              <div className="score-head">
-                <span>Completed</span>
-                <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
-              </div>
-              <div className="score-number">{ov.completedAudits} <span>audits</span></div>
-            </article>
+          {/* Secondary count stats */}
+          <div className="db-stat-row">
+            <div className="db-stat-item">
+              <span className="db-stat-value">{ov.totalAudits}</span>
+              <span className="db-stat-label">Total Audits</span>
+            </div>
+            <div className="db-stat-divider" />
+            <div className="db-stat-item">
+              <span className="db-stat-value">{ov.completedAudits}</span>
+              <span className="db-stat-label">Completed</span>
+            </div>
+            <div className="db-stat-divider" />
+            <div className="db-stat-item">
+              <span className="db-stat-value" style={{ color: '#b91c1c' }}>{ov.criticalCount ?? 0}</span>
+              <span className="db-stat-label">Critical Issues</span>
+            </div>
+            <div className="db-stat-divider" />
+            <div className="db-stat-item">
+              <span className="db-stat-value" style={{ color: '#b45309' }}>{ov.warningCount ?? 0}</span>
+              <span className="db-stat-label">Warnings</span>
+            </div>
+            <div className="db-stat-divider" />
+            <div className="db-stat-item">
+              <span className="db-stat-value" style={{ color: '#15803d' }}>{ov.passedCount ?? 0}</span>
+              <span className="db-stat-label">Passed</span>
+            </div>
           </div>
         </section>
 
+        {/* ── Audit History + Issues grid ───────────────────────── */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-4 min-w-0">
-          {/* Recent Audits Table */}
+
+          {/* Audit History Table */}
           <section className="panel-panel recent-audits-panel lg:col-span-2 overflow-hidden min-w-0">
             <div className="section-title-row compact-row">
               <div>
                 <span className="section-label">Audit History</span>
                 <h2>All Audits</h2>
               </div>
-              <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
             </div>
 
-            {/* Delete error banner */}
             {deleteError && (
-              <div
-                className="form-message error-message"
-                role="alert"
-                style={{ marginBottom: '1rem', fontSize: '0.8rem' }}
-              >
+              <div className="form-message error-message" role="alert" style={{ marginBottom: '1rem', fontSize: '0.8rem' }}>
                 <span aria-hidden="true">!</span>
                 <span>{deleteError}</span>
                 <button
                   onClick={() => setDeleteError('')}
                   style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#991b1b', fontWeight: 700, fontSize: '1rem', lineHeight: 1 }}
                   aria-label="Dismiss error"
-                >
-                  ×
-                </button>
+                >×</button>
               </div>
             )}
 
@@ -359,20 +369,32 @@ export default function DashboardPage() {
                       allAudits.map((audit) => {
                         const id = String(audit._id)
                         const isDeleting = deletingId === id
+                        const scoreColor = (s) => s == null ? 'var(--text-secondary)' : s >= 70 ? '#15803d' : s >= 45 ? '#b45309' : '#b91c1c'
                         return (
-                          <tr key={id} style={{ opacity: isDeleting ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+                          <tr
+                            key={id}
+                            className="db-table-row"
+                            style={{ opacity: isDeleting ? 0.5 : 1, transition: 'opacity 0.2s' }}
+                          >
                             <td className="website-name">{audit.fetchedUrl || audit.url}</td>
-                            <td>{audit.seoScore != null ? `${audit.seoScore}/100` : '—'}</td>
-                            <td>{audit.aeoScore != null ? `${audit.aeoScore}/100` : '—'}</td>
-                            <td>{audit.geoScore != null ? `${audit.geoScore}/100` : '—'}</td>
+                            <td style={{ fontWeight: 600, color: scoreColor(audit.seoScore) }}>
+                              {audit.seoScore != null ? audit.seoScore : '—'}
+                            </td>
+                            <td style={{ fontWeight: 600, color: scoreColor(audit.aeoScore) }}>
+                              {audit.aeoScore != null ? audit.aeoScore : '—'}
+                            </td>
+                            <td style={{ fontWeight: 600, color: scoreColor(audit.geoScore) }}>
+                              {audit.geoScore != null ? audit.geoScore : '—'}
+                            </td>
                             <td>
                               <span style={{
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                padding: '0.2em 0.6em',
-                                borderRadius: '4px',
-                                background: audit.status === 'completed' ? '#d1fae5' : audit.status === 'failed' ? '#fee2e2' : '#fef9c3',
-                                color: audit.status === 'completed' ? '#065f46' : audit.status === 'failed' ? '#991b1b' : '#854d0e',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '0.2em 0.65em',
+                                borderRadius: '999px',
+                                background: audit.status === 'completed' ? '#dcfce7' : audit.status === 'failed' ? '#fee2e2' : '#fef9c3',
+                                color: audit.status === 'completed' ? '#15803d' : audit.status === 'failed' ? '#991b1b' : '#854d0e',
+                                border: `1px solid ${audit.status === 'completed' ? '#86efac' : audit.status === 'failed' ? '#fca5a5' : '#fde68a'}`,
                               }}>
                                 {audit.status}
                               </span>
@@ -380,8 +402,8 @@ export default function DashboardPage() {
                             <td>{formatDate(audit.createdAt)}</td>
                             <td>
                               {audit.status === 'completed'
-                                ? <Link to={`/audit-report?id=${audit._id}`} className="text-link">View Report</Link>
-                                : <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>—</span>
+                                ? <Link to={`/audit-report?id=${audit._id}`} className="text-link">View →</Link>
+                                : <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
                               }
                             </td>
                             <td>
@@ -402,14 +424,8 @@ export default function DashboardPage() {
                                   lineHeight: 1.5,
                                   transition: 'background 0.15s, color 0.15s',
                                 }}
-                                onMouseEnter={(e) => {
-                                  if (!isDeleting) {
-                                    e.currentTarget.style.background = '#fee2e2'
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = 'none'
-                                }}
+                                onMouseEnter={(e) => { if (!isDeleting) e.currentTarget.style.background = '#fee2e2' }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}
                               >
                                 {isDeleting ? '…' : 'Delete'}
                               </button>
@@ -423,7 +439,6 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Pagination controls */}
             {auditPagination && auditPagination.totalPages > 1 && (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem', padding: '0.75rem 0 0.25rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                 <span>Page {auditPagination.page} of {auditPagination.totalPages}</span>
@@ -432,17 +447,13 @@ export default function DashboardPage() {
                   onClick={() => setAuditPage((p) => Math.max(1, p - 1))}
                   disabled={auditPagination.page <= 1 || historyLoading}
                   style={{ padding: '0.2em 0.7em', border: '1px solid #e1e4e8', borderRadius: '4px', background: 'transparent', cursor: auditPagination.page <= 1 ? 'default' : 'pointer', opacity: auditPagination.page <= 1 ? 0.4 : 1 }}
-                >
-                  ← Prev
-                </button>
+                >← Prev</button>
                 <button
                   id="audit-next-page"
                   onClick={() => setAuditPage((p) => Math.min(auditPagination.totalPages, p + 1))}
                   disabled={auditPagination.page >= auditPagination.totalPages || historyLoading}
                   style={{ padding: '0.2em 0.7em', border: '1px solid #e1e4e8', borderRadius: '4px', background: 'transparent', cursor: auditPagination.page >= auditPagination.totalPages ? 'default' : 'pointer', opacity: auditPagination.page >= auditPagination.totalPages ? 0.4 : 1 }}
-                >
-                  Next →
-                </button>
+                >Next →</button>
               </div>
             )}
           </section>
@@ -454,40 +465,41 @@ export default function DashboardPage() {
                 <span className="section-label">Health Check</span>
                 <h2>Issues Summary</h2>
               </div>
-              <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
             </div>
 
-            <div className="issue-summary-grid">
-              <article className="issue-item">
-                <div>
-                  <div className="issue-number danger">{zeroPad(ov.criticalCount)}</div>
-                  <div className="issue-label">Critical Issues</div>
+            <div className="db-issue-list">
+              <div className="db-issue-row db-issue-critical">
+                <div className="db-issue-count">{zeroPad(ov.criticalCount)}</div>
+                <div className="db-issue-meta">
+                  <div className="db-issue-name">Critical Issues</div>
+                  <div className="db-issue-hint">Requires immediate attention</div>
                 </div>
-              </article>
-              <article className="issue-item">
-                <div>
-                  <div className="issue-number warning">{zeroPad(ov.warningCount)}</div>
-                  <div className="issue-label">Warnings</div>
+              </div>
+              <div className="db-issue-row db-issue-warning">
+                <div className="db-issue-count">{zeroPad(ov.warningCount)}</div>
+                <div className="db-issue-meta">
+                  <div className="db-issue-name">Warnings</div>
+                  <div className="db-issue-hint">Should be addressed soon</div>
                 </div>
-              </article>
-              <article className="issue-item">
-                <div>
-                  <div className="issue-number success">{zeroPad(ov.passedCount)}</div>
-                  <div className="issue-label">Passed Checks</div>
+              </div>
+              <div className="db-issue-row db-issue-passed">
+                <div className="db-issue-count">{zeroPad(ov.passedCount)}</div>
+                <div className="db-issue-meta">
+                  <div className="db-issue-name">Passed Checks</div>
+                  <div className="db-issue-hint">Performing well</div>
                 </div>
-              </article>
+              </div>
             </div>
           </aside>
         </section>
 
-        {/* Recommendations Summary */}
+        {/* ── Recommendations ──────────────────────────────────── */}
         <section className="panel-panel recommendations-panel">
           <div className="section-title-row compact-row">
             <div>
               <span className="section-label">Recommended Actions</span>
               <h2>Recommendations</h2>
             </div>
-            <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
           </div>
 
           {recs.high.length === 0 && recs.medium.length === 0 && recs.low.length === 0 ? (
@@ -496,30 +508,27 @@ export default function DashboardPage() {
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {/* High priority first */}
               {recs.high.map((item, idx) => (
                 <article className="recommendation" key={`hp-${idx}`}>
-                  <span className="recommendation-icon">HP</span>
+                  <span className="tier-label high" style={{ fontSize: '0.62rem', padding: '2px 7px', flexShrink: 0, alignSelf: 'flex-start' }}>High</span>
                   <div>
                     <h3>{item.title}</h3>
                     <p>{item.explanation}</p>
                   </div>
                 </article>
               ))}
-              {/* Then medium */}
               {recs.medium.map((item, idx) => (
                 <article className="recommendation" key={`mp-${idx}`}>
-                  <span className="recommendation-icon">MP</span>
+                  <span className="tier-label medium" style={{ fontSize: '0.62rem', padding: '2px 7px', flexShrink: 0, alignSelf: 'flex-start' }}>Med</span>
                   <div>
                     <h3>{item.title}</h3>
                     <p>{item.explanation}</p>
                   </div>
                 </article>
               ))}
-              {/* Then low */}
               {recs.low.map((item, idx) => (
                 <article className="recommendation" key={`lp-${idx}`}>
-                  <span className="recommendation-icon">LP</span>
+                  <span className="tier-label low" style={{ fontSize: '0.62rem', padding: '2px 7px', flexShrink: 0, alignSelf: 'flex-start' }}>Low</span>
                   <div>
                     <h3>{item.title}</h3>
                     <p>{item.explanation}</p>

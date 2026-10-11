@@ -276,7 +276,6 @@ export default function AuditReportPage() {
             <article className="score-cell score-cell-primary break-words min-w-0">
               <div className="score-head">
                 <span>SEO Score</span>
-                <span className="mini-label">Live Data</span>
               </div>
               <div className="score-number">{audit.seoScore ?? '—'} <span>/ 100</span></div>
             </article>
@@ -284,7 +283,6 @@ export default function AuditReportPage() {
             <article className="score-cell break-words min-w-0">
               <div className="score-head">
                 <span>AEO Score</span>
-                <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
               </div>
               <div className="score-number">{audit.aeoScore ?? '—'} <span>/ 100</span></div>
             </article>
@@ -292,7 +290,6 @@ export default function AuditReportPage() {
             <article className="score-cell break-words min-w-0">
               <div className="score-head">
                 <span>GEO Score</span>
-                <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
               </div>
               <div className="score-number">{audit.geoScore ?? '—'} <span>/ 100</span></div>
             </article>
@@ -300,9 +297,7 @@ export default function AuditReportPage() {
             <article className="score-cell break-words min-w-0">
               <div className="score-head">
                 <span>Technical SEO</span>
-                {audit.technicalScore ? (
-                  <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
-                ) : (
+                {!audit.technicalScore && (
                   <span className="mini-label">Not available</span>
                 )}
               </div>
@@ -312,9 +307,7 @@ export default function AuditReportPage() {
             <article className="score-cell break-words min-w-0">
               <div className="score-head">
                 <span>On-Page SEO</span>
-                {audit.onPageScore ? (
-                  <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
-                ) : (
+                {!audit.onPageScore && (
                   <span className="mini-label">Not available</span>
                 )}
               </div>
@@ -324,9 +317,7 @@ export default function AuditReportPage() {
             <article className="score-cell break-words min-w-0">
               <div className="score-head">
                 <span>Content</span>
-                {audit.contentScore ? (
-                  <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
-                ) : (
+                {!audit.contentScore && (
                   <span className="mini-label">Not available</span>
                 )}
               </div>
@@ -344,7 +335,6 @@ export default function AuditReportPage() {
                 <span className="section-label">SEO Issues</span>
                 <h2>Critical Issues</h2>
               </div>
-              <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
             </div>
             <div className="issue-list">
               {criticalIssues.length === 0 ? (
@@ -374,7 +364,6 @@ export default function AuditReportPage() {
                 <span className="section-label">SEO Analysis</span>
                 <h2>Warnings</h2>
               </div>
-              <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
             </div>
             <div className="issue-list">
               {warnings.length === 0 ? (
@@ -404,7 +393,6 @@ export default function AuditReportPage() {
                 <span className="section-label">SEO Analysis</span>
                 <h2>Passed Checks</h2>
               </div>
-              <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
             </div>
             <div className="issue-list">
               {passedChecks.length === 0 ? (
@@ -435,7 +423,6 @@ export default function AuditReportPage() {
               <span className="section-label">Prioritized SEO Plan</span>
               <h2>SEO Recommendations</h2>
             </div>
-            <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
           </div>
           <div className="recommendation-stack">
             {seoRecs.high && seoRecs.high.length > 0 && (
@@ -490,7 +477,6 @@ export default function AuditReportPage() {
               <span className="section-label">AEO Analysis</span>
               <h2>Answer Engine Readiness</h2>
             </div>
-            <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
@@ -517,7 +503,6 @@ export default function AuditReportPage() {
               <span className="section-label">Prioritized AEO Plan</span>
               <h2>AEO Recommendations</h2>
             </div>
-            <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
           </div>
           <div className="recommendation-stack">
             {aeoRecs.high && aeoRecs.high.length > 0 && (
@@ -572,7 +557,6 @@ export default function AuditReportPage() {
               <span className="section-label">GEO Analysis</span>
               <h2>Generative Engine Readiness</h2>
             </div>
-            <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
@@ -603,7 +587,6 @@ export default function AuditReportPage() {
               <span className="section-label">Prioritized GEO Plan</span>
               <h2>GEO Recommendations</h2>
             </div>
-            <span className="mini-label" style={{ color: '#16a34a' }}>Live Data</span>
           </div>
           <div className="recommendation-stack">
             {geoRecs.high && geoRecs.high.length > 0 && (
