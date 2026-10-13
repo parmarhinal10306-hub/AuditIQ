@@ -76,40 +76,44 @@ const AEO_POINTS = [
 
 const FAQ_ITEMS = [
   {
-    question: 'What is an SEO audit?',
-    answer: 'Basically it is a health check for your website. You are looking at things like whether your pages load fast enough, if Google can actually crawl them, whether your titles and descriptions make sense, and if your internal links are pointing to the right places. Most sites have at least a handful of issues they do not know about. The audit just surfaces them so you can fix them.',
+    question: 'Is this tool free to use?',
+    answer: 'Yes, you can run your first audit for free without a credit card. Just sign up, enter your website URL and you will get a full SEO, AEO and GEO report. If you want to save reports and track progress over time, you will need an account.',
   },
   {
-    question: 'What is AEO and why should I care about it now?',
-    answer: 'AEO is Answer Engine Optimization — it is about making sure your content gets picked up when people ask questions in ChatGPT, Perplexity, Google AI Overviews, and similar tools. These platforms do not just link to pages like Google does. They pull out specific answers. If your content is not written and structured in a way that makes it easy to extract, you are basically invisible to that whole channel. It is becoming more important every month.',
+    question: 'What is an SEO audit and why do I need one?',
+    answer: 'Think of it as a checkup for your site. It looks at whether Google can properly crawl your pages, whether your titles and descriptions are set up right, how fast your site loads, whether your links make sense, and a bunch of other things that affect how you rank. Most websites have issues they are not even aware of. An audit tells you exactly what they are so you can actually do something about them.',
+  },
+  {
+    question: 'My site looks fine to me. Why would it have SEO problems?',
+    answer: 'A lot of SEO issues are not visible to regular visitors. Things like missing schema markup, duplicate meta descriptions, slow server response times, broken canonical tags, or images without alt text do not affect how the site looks but they do affect how search engines and AI tools see it. That is exactly the kind of stuff this audit catches.',
+  },
+  {
+    question: 'What is AEO and do I actually need to worry about it?',
+    answer: 'AEO stands for Answer Engine Optimization. It is about making your content easy to pick up when someone asks a question in ChatGPT, Perplexity or Google AI Overviews. These tools do not just link to websites like Google does. They extract specific answers directly. If your content is not structured in a way that makes that easy, you miss out on a growing chunk of traffic. It is worth paying attention to now before everyone else does.',
   },
   {
     question: 'What is GEO?',
-    answer: 'GEO stands for Generative Engine Optimization. Think of it as the next layer after AEO. It is not just about getting cited — it is about whether AI models can actually understand what your content is saying, put it in context, and accurately represent your brand or topic. If your content is vague, thin, or poorly structured, generative tools tend to either skip it or get it wrong.',
+    answer: 'GEO is Generative Engine Optimization. It goes a step further than AEO. It is not just about getting cited somewhere. It is about whether AI tools can actually understand and accurately summarize what your content is saying. If your writing is vague or thin, generative tools either skip it or misrepresent it. GEO checks for that.',
   },
   {
-    question: 'Is there a real difference between SEO, AEO and GEO, or is it just marketing jargon?',
-    answer: 'There is a real difference, though they do overlap a lot. SEO is still about ranking in traditional search results — titles, backlinks, page speed, that kind of thing. AEO is specifically about getting your content used as a direct answer in AI tools. GEO goes further and looks at how well generative models can synthesize your content into a coherent summary or response. You need all three now because people find information in very different ways.',
+    question: 'How is this different from Google Search Console or Semrush?',
+    answer: 'Google Search Console shows you data about your site from Google, like impressions and crawl errors. Semrush is mainly about keywords and competitor tracking. This tool focuses on actually auditing your page content and structure across SEO, AEO and GEO and telling you what to fix. It is more of a diagnostic tool than an analytics one.',
   },
   {
-    question: 'What exactly does the GEO audit check?',
-    answer: 'It checks things like whether your content answers questions clearly and early, whether you cover the topic in enough depth for an AI to trust it as a source, whether your entities (people, places, brands) are clearly identified, and whether there are enough trust signals around the content. Each check gets a score so you can see exactly where you are losing points.',
+    question: 'How long does the audit take?',
+    answer: 'Usually just a few seconds. You enter the URL, it fetches and analyzes the page, and the report is ready. The audit checks your page structure, content, tags, links, schema and more in one go so you do not have to wait around.',
   },
   {
-    question: 'How does the audit actually work?',
-    answer: 'You paste in your URL and it runs a set of checks across SEO, AEO and GEO — things like missing tags, schema markup, heading structure, content depth, link setup, and more. You get a score for each area, a list of what was found, and specific recommendations sorted by how much impact fixing them would have. It is meant to give you something you can actually act on, not just a big list of abstract metrics.',
+    question: 'Do I need to know coding to fix the issues?',
+    answer: 'Not for everything. Some recommendations like writing a better meta description or improving your headings can be done directly in your CMS without touching any code. Others like adding schema markup or fixing redirect chains will need someone who can edit the HTML. The report clearly labels which is which.',
   },
   {
-    question: 'Do I need any technical knowledge to use this?',
-    answer: 'Not really. The report is written to make sense whether you are a developer or just someone who runs a website. You will see things clearly labeled as critical issues or smaller warnings, and each one has a plain-English explanation of what it means and what to do. Some fixes will need a developer but a lot of them you can probably handle yourself.',
+    question: 'Will fixing these issues actually help my Google rankings?',
+    answer: 'Usually yes, especially for critical issues. Things like fixing missing title tags, broken structure or absent canonical URLs have a direct impact on how search engines crawl and rank your pages. Smaller warnings matter too but they add up over time. No tool can promise specific ranking outcomes but fixing real problems genuinely helps.',
   },
   {
-    question: 'Will following the recommendations actually improve my rankings?',
-    answer: 'There are no guarantees with SEO — anyone who tells you otherwise is selling something. But the checks in this tool are based on well-established ranking signals and best practices. Fixing critical issues like missing meta tags, broken structure, or absent schema will generally help. The GEO and AEO improvements are newer territory but early evidence suggests they matter a lot for AI-driven traffic.',
-  },
-  {
-    question: 'How often should I run an audit?',
-    answer: 'Honestly it depends on how actively you are updating your site. If you are making changes to pages regularly, once a month is reasonable. If your site is fairly stable, once every few months should be enough. The main reason to re-audit is to check that your fixes actually worked and to catch any new issues that crept in.',
+    question: 'Can I audit any website or just my own?',
+    answer: 'You can audit any publicly accessible website. Just enter the URL and run it. Some people use it to check competitor sites or to audit client websites before taking on SEO work. Just make sure the site is publicly reachable since the tool needs to be able to fetch and read the page.',
   },
 ]
 
